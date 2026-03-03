@@ -1,0 +1,15 @@
+{
+  "name": "blackroad-ai",
+  "version": "1.0.0",
+  "description": "BlackRoad AI — Ollama-powered inference, Stripe billing. No external AI providers.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy:vercel": "vercel --prod",
+    "deploy:cloudflare": "wrangler pages deploy . --project-name blackroad-ai"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

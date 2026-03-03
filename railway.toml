@@ -1,0 +1,18 @@
+[build]
+  command = ""
+  publishDirectory = "."
+
+[deploy]
+  region = "us-east"
+  startCommand = ""
+
+[[services]]
+  name = "ollama-proxy"
+  source = "."
+
+[services.variables]
+  OLLAMA_URL = { value = "http://localhost:11434" }
+  OLLAMA_MODEL = { value = "llama3.2" }
+  STRIPE_SECRET_KEY = { secret = true }
+  STRIPE_WEBHOOK_SECRET = { secret = true }
+  PUBLIC_URL = { value = "https://your-app.railway.app" }
