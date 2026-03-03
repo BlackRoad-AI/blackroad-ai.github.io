@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Hosted Infrastructure — BlackRoad AI</title>
+  <meta name="description" content="Route BlackRoad AI through your own hardware using Tailscale and Cloudflare Tunnel.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #9C27B0;
+      --black: #000000;
+      --white: #ffffff;
+      --gray-900: #0a0a0a;
+      --gray-800: #141414;
+      --gray-700: #1e1e1e;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ───────────────────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: #9C27B0; }
+
+    .nav-links { display: flex; gap: 24px; }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+
+    /* ── CONTENT ───────────────────────────────────────── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    .page-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #9C27B018;
+      border: 1px solid #9C27B040;
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9C27B0;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #9C27B0 60%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .lead {
+      font-size: 18px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 48px;
+      max-width: 640px;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin: 48px 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      margin: 28px 0 10px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 16px;
+    }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      background: rgba(156,39,176,0.12);
+      border: 1px solid rgba(156,39,176,0.25);
+      padding: 2px 7px;
+      border-radius: 5px;
+      color: #ce93d8;
+    }
+
+    pre {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 24px;
+      overflow-x: auto;
+      margin: 16px 0 24px;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 13px;
+      color: #e0e0e0;
+      line-height: 1.65;
+    }
+
+    .step-list {
+      counter-reset: steps;
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .step-list li {
+      counter-increment: steps;
+      position: relative;
+      padding: 20px 20px 20px 64px;
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.65;
+    }
+
+    .step-list li::before {
+      content: counter(steps);
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 28px;
+      height: 28px;
+      background: #9C27B0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 28px;
+      text-align: center;
+    }
+
+    .callout {
+      background: #9C27B010;
+      border-left: 3px solid #9C27B0;
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+    }
+
+    .callout strong { color: #ce93d8; }
+
+    .arch-diagram {
+      background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 28px;
+      margin: 24px 0;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 2;
+      color: rgba(255,255,255,0.6);
+      overflow-x: auto;
+    }
+
+    .arch-diagram .highlight { color: #ce93d8; font-weight: 600; }
+    .arch-diagram .dim { color: rgba(255,255,255,0.25); }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #9C27B015;
+      border: 1px solid #9C27B030;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9C27B0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #9C27B0;
+      color: #fff;
+      box-shadow: 0 0 20px #9C27B040;
+    }
+
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 30px #9C27B060; }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 48px; }
+
+    a { color: #ce93d8; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="/"><span>BlackRoad</span> AI</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/oauth.html">OAuth</a>
+      <a href="/infra.html" class="active">Infrastructure</a>
+      <a href="https://github.com/BlackRoad-AI" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <div class="page-badge">🖥️ Infrastructure</div>
+    <h1>Route Everything to Your Infra</h1>
+    <p class="lead">
+      Use Tailscale for zero-config encrypted mesh networking and Cloudflare Tunnel for public HTTPS access —
+      no open firewall ports, no external providers in the data path.
+    </p>
+
+    <h2>Architecture Overview</h2>
+    <p>
+      The goal: every BlackRoad AI service request terminates on <em>your</em> hardware, not on a cloud provider's servers.
+    </p>
+    <div class="arch-diagram">
+      <span class="dim">Internet</span><br>
+      &nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;▼<br>
+      <span class="highlight">Cloudflare Tunnel</span>&nbsp;&nbsp;<span class="dim">← no open ports on your router</span><br>
+      &nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;▼<br>
+      <span class="highlight">cloudflared</span> daemon on Pi / server<br>
+      &nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;├─▶ <span class="highlight">Nginx reverse proxy</span>&nbsp;&nbsp;<span class="dim">(routes by hostname/path)</span><br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─▶ AI service (Ollama, vLLM, …)<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─▶ Authentik (OAuth — see <a href="/oauth.html">OAuth page</a>)<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─▶ Any other self-hosted app<br>
+      &nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;└─▶ <span class="highlight">Tailscale mesh</span>&nbsp;&nbsp;<span class="dim">(internal device-to-device, encrypted)</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─▶ Pi 1 — Ollama / vLLM<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─▶ Pi 2 — Authentik / DB<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─▶ Pi N — additional nodes
+    </div>
+
+    <h2>Part 1 — Tailscale Mesh</h2>
+    <p>
+      Tailscale creates a WireGuard-based encrypted overlay network between all your devices.
+      Once set up, every Pi and server can reach every other node via a stable
+      <code>100.x.x.x</code> address or via MagicDNS hostnames, regardless of physical location.
+    </p>
+
+    <h3>Install Tailscale on each Pi / server</h3>
+    <pre><code># Run this on each node
+curl -fsSL https://tailscale.com/install.sh | sh
+
+# Bring the node up (will open a browser auth URL)
+sudo tailscale up
+
+# (Optional) advertise this node as a subnet router so other mesh
+# devices can reach your LAN subnets:
+sudo tailscale up --advertise-routes=192.168.1.0/24</code></pre>
+
+    <h3>Enable MagicDNS &amp; HTTPS Certificates</h3>
+    <p>
+      In the Tailscale admin panel (<a href="https://login.tailscale.com/admin/dns" target="_blank" rel="noopener">tailscale.com/admin/dns</a>):
+    </p>
+    <ol class="step-list">
+      <li>Enable <strong style="color:#fff;">MagicDNS</strong> — your Pi is now reachable as <code>pi-hostname.tail&lt;xyz&gt;.ts.net</code> from any mesh device.</li>
+      <li>Enable <strong style="color:#fff;">HTTPS Certificates</strong> — Tailscale auto-provisions Let's Encrypt certs for your mesh hostnames.</li>
+      <li>Optionally configure an <strong style="color:#fff;">Exit Node</strong> on one Pi to route all internet traffic through your home network.</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Confirmed:</strong> Normal ChatGPT / Anthropic / OpenAI traffic does <em>not</em> route through your Pis.
+      The flow is: <code>your device → internet → OpenAI servers</code>. Your Pis only handle traffic you explicitly
+      send to them. Tailscale creates an outbound-initiated, encrypted mesh — no inbound tunnels are opened without
+      your explicit configuration.
+    </div>
+
+    <h2>Part 2 — Cloudflare Tunnel</h2>
+    <p>
+      Cloudflare Tunnel (<code>cloudflared</code>) creates an outbound-only connection from your Pi to
+      Cloudflare's edge. This exposes your services at a public HTTPS URL without opening any
+      inbound firewall ports or exposing your home IP.
+    </p>
+
+    <h3>Install cloudflared</h3>
+    <pre><code># Debian / Raspberry Pi OS
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg \
+  | sudo tee /usr/share/keyrings/cloudflare-main.gpg > /dev/null
+
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] \
+  https://pkg.cloudflare.com/cloudflared any main' \
+  | sudo tee /etc/apt/sources.list.d/cloudflared.list
+
+sudo apt update && sudo apt install cloudflared</code></pre>
+
+    <h3>Authenticate &amp; Create Tunnel</h3>
+    <pre><code># Log in — opens a browser URL
+cloudflared tunnel login
+
+# Create a named tunnel
+cloudflared tunnel create blackroad-ai
+
+# Note the tunnel UUID printed — you will use it in the config below</code></pre>
+
+    <h3>Tunnel Configuration</h3>
+    <pre><code># ~/.cloudflared/config.yml
+tunnel: &lt;your-tunnel-uuid&gt;
+credentials-file: /home/pi/.cloudflared/&lt;uuid&gt;.json
+
+ingress:
+  # Auth / OAuth — Authentik
+  - hostname: auth.yourdomain.com
+    service: http://localhost:9000
+
+  # LLM inference — Ollama
+  - hostname: ollama.yourdomain.com
+    service: http://localhost:11434
+
+  # LLM inference — vLLM (OpenAI-compatible API)
+  - hostname: api.yourdomain.com
+    service: http://localhost:8000
+
+  # Catch-all (required)
+  - service: http_status:404</code></pre>
+
+    <h3>Route DNS &amp; Start Tunnel</h3>
+    <pre><code># Point DNS (creates CNAME to Cloudflare automatically)
+cloudflared tunnel route dns blackroad-ai auth.yourdomain.com
+cloudflared tunnel route dns blackroad-ai ollama.yourdomain.com
+cloudflared tunnel route dns blackroad-ai api.yourdomain.com
+
+# Run as a system service (starts on boot)
+sudo cloudflared service install
+sudo systemctl enable --now cloudflared</code></pre>
+
+    <h2>Part 3 — Nginx Reverse Proxy (Local Routing)</h2>
+    <p>
+      If you run multiple services on the same Pi, Nginx routes requests to the right container
+      based on path or port. This is optional if each service is on its own port and mapped directly
+      in the Cloudflare Tunnel config above.
+    </p>
+    <pre><code># /etc/nginx/sites-available/blackroad-ai
+server {
+    listen 80;
+    server_name api.yourdomain.com;
+
+    # vLLM / Ollama — OpenAI-compatible endpoint
+    location / {
+        proxy_pass         http://127.0.0.1:8000;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+
+        # Allow streaming responses (for LLM token streaming)
+        proxy_buffering    off;
+        proxy_read_timeout 300s;
+    }
+}
+
+server {
+    listen 80;
+    server_name auth.yourdomain.com;
+
+    location / {
+        proxy_pass         http://127.0.0.1:9000;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}</code></pre>
+    <pre><code>sudo ln -s /etc/nginx/sites-available/blackroad-ai /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx</code></pre>
+
+    <h2>Part 4 — Routing AI Clients to Your Infra</h2>
+    <p>
+      Once your tunnel is live, point any OpenAI-compatible client at your own endpoint instead
+      of <code>api.openai.com</code>:
+    </p>
+    <pre><code># Environment variable override (works with most SDKs)
+export OPENAI_BASE_URL=https://api.yourdomain.com/v1
+export OPENAI_API_KEY=your-local-api-key
+
+# Or in Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.yourdomain.com/v1",
+    api_key="your-local-api-key",   # Set any non-empty string for Ollama
+)
+
+response = client.chat.completions.create(
+    model="llama3",     # or any model loaded in Ollama / vLLM
+    messages=[{"role": "user", "content": "Hello from my own infra!"}],
+)</code></pre>
+
+    <div class="callout">
+      <strong>VS Code / Copilot alternatives:</strong> Point <a href="https://github.com/continuedev/continue" target="_blank" rel="noopener">Continue</a>
+      or <a href="https://github.com/TabbyML/tabby" target="_blank" rel="noopener">Tabby</a>
+      at your self-hosted endpoint for local AI code completions — no Copilot subscription, no Anthropic,
+      no external data egress.
+    </div>
+
+    <h2>Checklist — Full Self-Hosted Stack</h2>
+    <div class="two-col">
+      <div class="card">
+        <h4>✅ Networking</h4>
+        <p>Tailscale mesh installed on all Pi nodes. MagicDNS and HTTPS certs enabled.</p>
+        <div class="tag-row"><span class="tag">Tailscale</span><span class="tag">WireGuard</span></div>
+      </div>
+      <div class="card">
+        <h4>✅ Public Access</h4>
+        <p>Cloudflare Tunnel running as a system service. DNS CNAMEs pointing to tunnel.</p>
+        <div class="tag-row"><span class="tag">cloudflared</span><span class="tag">No open ports</span></div>
+      </div>
+      <div class="card">
+        <h4>✅ Authentication</h4>
+        <p>Authentik deployed via Docker Compose. OAuth 2.0 provider configured for each app.</p>
+        <div class="tag-row"><span class="tag">Authentik</span><span class="tag">OAuth 2.0</span></div>
+      </div>
+      <div class="card">
+        <h4>✅ LLM Inference</h4>
+        <p>Ollama or vLLM running on Pi. OpenAI-compatible API exposed via Cloudflare Tunnel.</p>
+        <div class="tag-row"><span class="tag">Ollama</span><span class="tag">vLLM</span></div>
+      </div>
+      <div class="card">
+        <h4>✅ Routing</h4>
+        <p>All AI clients use <code>OPENAI_BASE_URL</code> pointing at your own tunnel URL.</p>
+        <div class="tag-row"><span class="tag">OpenAI SDK</span><span class="tag">Self-hosted</span></div>
+      </div>
+      <div class="card">
+        <h4>✅ Reverse Proxy</h4>
+        <p>Nginx routing by hostname. Streaming enabled for LLM token output.</p>
+        <div class="tag-row"><span class="tag">Nginx</span><span class="tag">Proxy</span></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="/oauth.html" class="btn btn-primary">← OAuth Setup</a>
+      <a href="/" class="btn btn-secondary">Home</a>
+      <a href="https://github.com/BlackRoad-AI" target="_blank" rel="noopener" class="btn btn-secondary">GitHub →</a>
+    </div>
+
+  </main>
+
+</body>
+</html>
