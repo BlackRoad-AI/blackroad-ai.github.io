@@ -315,6 +315,365 @@
       .stats { flex-direction: column; }
       .stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
     }
+
+    /* ── CHAT ─────────────────────────────────────────── */
+    .chat-section {
+      padding: 80px 2rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #9C27B0;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      text-align: center;
+      font-size: 15px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 48px;
+    }
+
+    .chat-container {
+      max-width: 760px;
+      margin: 0 auto;
+      background: #0d0d0d;
+      border: 1px solid rgba(156,39,176,0.25);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(156,39,176,0.06);
+    }
+
+    .chat-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #22c55e80;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-dot.offline { background: #ef4444; box-shadow: 0 0 6px #ef444480; }
+
+    .model-select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.8);
+      font-size: 12px;
+      padding: 5px 10px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .model-select:focus { border-color: #9C27B060; }
+
+    .chat-messages {
+      height: 340px;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: #9C27B040; border-radius: 2px; }
+
+    .chat-welcome {
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255,255,255,0.35);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .chat-welcome code {
+      background: rgba(156,39,176,0.15);
+      border: 1px solid rgba(156,39,176,0.3);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 13px;
+      color: #9C27B0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 88%;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .chat-msg.user { align-self: flex-end; align-items: flex-end; }
+    .chat-msg.assistant { align-self: flex-start; }
+
+    .msg-bubble {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .chat-msg.user .msg-bubble {
+      background: #9C27B0;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-msg.assistant .msg-bubble {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.85);
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .msg-meta {
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    .typing-dots span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typingBounce 1.2s ease-in-out infinite;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.3);
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 14px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .chat-input:focus { border-color: #9C27B060; }
+
+    .chat-input::placeholder { color: rgba(255,255,255,0.25); }
+
+    .chat-send-btn {
+      background: #9C27B0;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .chat-send-btn:hover { background: #7B1FA2; transform: scale(1.05); }
+    .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .chat-footer-note {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      padding: 10px 16px 14px;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── PRICING ──────────────────────────────────────── */
+    .pricing-section {
+      padding: 80px 2rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 760px) {
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+    }
+
+    .pricing-card {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .pricing-card:hover { border-color: rgba(156,39,176,0.35); }
+
+    .pricing-card.featured {
+      border-color: rgba(156,39,176,0.5);
+      background: linear-gradient(180deg, rgba(156,39,176,0.08) 0%, #0d0d0d 60%);
+      position: relative;
+    }
+
+    .featured-badge {
+      position: absolute;
+      top: -1px; left: 50%; transform: translateX(-50%);
+      background: #9C27B0;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 16px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .plan-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .plan-price {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .plan-price sup { font-size: 22px; font-weight: 600; vertical-align: super; }
+    .plan-price small { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.4); }
+
+    .plan-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .plan-features li::before {
+      content: '✓';
+      color: #9C27B0;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .btn-plan {
+      display: block;
+      text-align: center;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-plan-primary {
+      background: #9C27B0;
+      color: #fff;
+      box-shadow: 0 0 20px #9C27B040;
+    }
+
+    .btn-plan-primary:hover { background: #7B1FA2; transform: translateY(-1px); }
+
+    .btn-plan-secondary {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .btn-plan-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+
+    .checkout-success {
+      display: none;
+      text-align: center;
+      padding: 60px 2rem;
+      color: #22c55e;
+    }
   </style>
 </head>
 <body>
@@ -370,6 +729,302 @@
       <div class="stat-label">AI Cost Target</div>
     </div>
   </div>
+
+  <!-- ── CHAT ────────────────────────────────────────────────────────────── -->
+  <section class="chat-section" id="chat">
+    <p class="section-label">Local AI</p>
+    <h2 class="section-title">Talk to Ollama</h2>
+    <p class="section-sub">@ollama · @copilot · @lucidia · @blackboxprogramming — all go straight to your hardware.</p>
+
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-status">
+          <span class="status-dot" id="ollamaStatusDot"></span>
+          <span id="ollamaStatusText">Ollama — Local Inference</span>
+        </div>
+        <select id="modelSelect" class="model-select" title="Select Ollama model">
+          <option value="llama3.2">llama3.2</option>
+          <option value="llama3.1">llama3.1</option>
+          <option value="deepseek-r1">deepseek-r1</option>
+          <option value="qwen2.5">qwen2.5</option>
+          <option value="mistral">mistral</option>
+          <option value="codellama">codellama</option>
+        </select>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-welcome" id="chatWelcome">
+          <p>All requests route to <strong>Ollama</strong> on your hardware.<br>Zero external AI providers.</p>
+          <p style="margin-top:12px;">Use <code>@ollama</code>, <code>@copilot</code>, <code>@lucidia</code>, or <code>@blackboxprogramming</code> — they all go to Ollama.</p>
+        </div>
+      </div>
+
+      <div class="chat-input-row">
+        <textarea id="chatInput" class="chat-input" rows="1"
+          placeholder="@ollama what can you do?  (also @copilot · @lucidia · @blackboxprogramming)"></textarea>
+        <button id="chatSend" class="chat-send-btn" title="Send">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <p class="chat-footer-note">⚡ Zero external AI providers · Your hardware · Your data</p>
+    </div>
+  </section>
+
+  <!-- ── PRICING ───────────────────────────────────────────────────────────── -->
+  <section class="pricing-section" id="pricing">
+    <p class="section-label">Stripe · Live</p>
+    <h2 class="section-title">Plans & Pricing</h2>
+    <p class="section-sub">Managed on your infrastructure. Billed via Stripe.</p>
+
+    <div id="checkoutSuccess" class="checkout-success">
+      <div style="font-size:48px;margin-bottom:16px;">✅</div>
+      <h3 style="font-size:24px;font-weight:700;color:#fff;margin-bottom:8px;">Payment Confirmed</h3>
+      <p style="color:rgba(255,255,255,0.5);">Welcome to BlackRoad AI. Your account is being provisioned.</p>
+    </div>
+
+    <div class="pricing-grid" id="pricingGrid">
+      <!-- Starter -->
+      <div class="pricing-card">
+        <div>
+          <p class="plan-name">Starter</p>
+          <p class="plan-price"><sup>$</sup>29<small>/mo</small></p>
+          <p class="plan-desc">Self-hosted Ollama on your own machine. Access to all open models.</p>
+        </div>
+        <ul class="plan-features">
+          <li>Ollama inference on your hardware</li>
+          <li>All open-source models</li>
+          <li>REST API access</li>
+          <li>Community support</li>
+        </ul>
+        <button class="btn-plan btn-plan-secondary"
+          data-price-id="price_starter"
+          data-mode="subscription"
+          onclick="startCheckout(this)">Get Started</button>
+      </div>
+
+      <!-- Pro (featured) -->
+      <div class="pricing-card featured">
+        <span class="featured-badge">Most Popular</span>
+        <div>
+          <p class="plan-name">Pro</p>
+          <p class="plan-price"><sup>$</sup>99<small>/mo</small></p>
+          <p class="plan-desc">Multi-node Ollama cluster. Priority routing and advanced orchestration.</p>
+        </div>
+        <ul class="plan-features">
+          <li>Everything in Starter</li>
+          <li>Multi-node Ollama cluster</li>
+          <li>Agent orchestration</li>
+          <li>vLLM + Ollama hybrid</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="btn-plan btn-plan-primary"
+          data-price-id="price_pro"
+          data-mode="subscription"
+          onclick="startCheckout(this)">Subscribe — $99/mo</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="pricing-card">
+        <div>
+          <p class="plan-name">Enterprise</p>
+          <p class="plan-price"><sup>$</sup>499<small>/mo</small></p>
+          <p class="plan-desc">Dedicated infrastructure, SLAs, white-glove onboarding.</p>
+        </div>
+        <ul class="plan-features">
+          <li>Everything in Pro</li>
+          <li>Dedicated hardware nodes</li>
+          <li>Custom model fine-tuning</li>
+          <li>99.9% uptime SLA</li>
+          <li>24/7 enterprise support</li>
+        </ul>
+        <button class="btn-plan btn-plan-secondary"
+          data-price-id="price_enterprise"
+          data-mode="subscription"
+          onclick="startCheckout(this)">Subscribe — $499/mo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SCRIPTS ──────────────────────────────────────────────────────────── -->
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Constants ──────────────────────────────────────────────────────────
+    const MENTION_RE = /@(copilot|lucidia|blackboxprogramming|ollama)\b\.?\s*/gi;
+    const API_BASE   = '';   // same origin; override for local dev if needed
+
+    // ── DOM refs ───────────────────────────────────────────────────────────
+    const msgEl      = document.getElementById('chatMessages');
+    const inputEl    = document.getElementById('chatInput');
+    const sendBtn    = document.getElementById('chatSend');
+    const modelSel   = document.getElementById('modelSelect');
+    const statusDot  = document.getElementById('ollamaStatusDot');
+    const statusText = document.getElementById('ollamaStatusText');
+    const welcomeEl  = document.getElementById('chatWelcome');
+
+    // ── Chat helpers ───────────────────────────────────────────────────────
+    function appendMsg(role, text) {
+      if (welcomeEl) welcomeEl.remove();
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const wrapper = document.createElement('div');
+      wrapper.className = `chat-msg ${role}`;
+      wrapper.innerHTML = `
+        <div class="msg-bubble"></div>
+        <span class="msg-meta">${role === 'user' ? 'You' : 'Ollama'} · ${now}</span>`;
+      wrapper.querySelector('.msg-bubble').textContent = text;
+      msgEl.appendChild(wrapper);
+      msgEl.scrollTop = msgEl.scrollHeight;
+      return wrapper.querySelector('.msg-bubble');
+    }
+
+    function showTyping() {
+      if (welcomeEl) welcomeEl.remove();
+      const el = document.createElement('div');
+      el.className = 'chat-msg assistant';
+      el.id = 'typingIndicator';
+      el.innerHTML = '<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+      msgEl.appendChild(el);
+      msgEl.scrollTop = msgEl.scrollHeight;
+    }
+
+    function removeTyping() {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.remove();
+    }
+
+    function setStatus(online) {
+      if (online) {
+        statusDot.classList.remove('offline');
+        statusText.textContent = 'Ollama — Local Inference';
+      } else {
+        statusDot.classList.add('offline');
+        statusText.textContent = 'Ollama — Connecting…';
+      }
+    }
+
+    // ── Send message ───────────────────────────────────────────────────────
+    async function send() {
+      const raw = inputEl.value.trim();
+      if (!raw) return;
+
+      inputEl.value = '';
+      inputEl.style.height = '';
+      sendBtn.disabled = true;
+
+      appendMsg('user', raw);
+      showTyping();
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: raw, model: modelSel.value }),
+        });
+
+        removeTyping();
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Request failed' }));
+          appendMsg('assistant', `⚠️ ${err.error || 'Request failed'}`);
+          setStatus(false);
+          return;
+        }
+
+        setStatus(true);
+
+        // Stream NDJSON chunks from Ollama
+        const bubble = appendMsg('assistant', '');
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let   buffer  = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const chunk = JSON.parse(line);
+              if (chunk.response) {
+                bubble.textContent += chunk.response;
+                msgEl.scrollTop = msgEl.scrollHeight;
+              }
+            } catch { /* skip malformed chunks */ }
+          }
+        }
+      } catch (err) {
+        removeTyping();
+        appendMsg('assistant', `⚠️ Could not reach Ollama: ${err.message}`);
+        setStatus(false);
+      } finally {
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }
+    }
+
+    // ── Event listeners ────────────────────────────────────────────────────
+    sendBtn.addEventListener('click', send);
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+
+    inputEl.addEventListener('input', function () {
+      this.style.height = '';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // ── Checkout ───────────────────────────────────────────────────────────
+    window.startCheckout = async function (btn) {
+      const priceId = btn.dataset.priceId;
+      const mode    = btn.dataset.mode || 'subscription';
+      const origText = btn.dataset.origText || btn.textContent;
+
+      btn.disabled    = true;
+      btn.textContent = 'Redirecting…';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId, mode }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert(data.error || 'Checkout unavailable. Please try again.');
+          btn.disabled    = false;
+          btn.textContent = origText;
+        }
+      } catch {
+        alert('Could not reach checkout. Please try again.');
+        btn.disabled    = false;
+        btn.textContent = origText;
+      }
+    };
+
+    // Save original button text
+    document.querySelectorAll('[data-price-id]').forEach((b) => {
+      b.dataset.origText = b.textContent;
+    });
+
+    // ── Show checkout success banner ───────────────────────────────────────
+    if (new URLSearchParams(location.search).get('checkout') === 'success') {
+      const successEl  = document.getElementById('checkoutSuccess');
+      const pricingGrid = document.getElementById('pricingGrid');
+      if (successEl)  successEl.style.display  = 'block';
+      if (pricingGrid) pricingGrid.style.display = 'none';
+      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }());
+  </script>
 
   <footer>
     <div class="footer-logo">
