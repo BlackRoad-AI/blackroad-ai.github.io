@@ -1,1037 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlackRoad AI — Intelligence at Scale</title>
-  <meta name="description" content="LLM inference, model deployment, and AI agent orchestration. vLLM, Ollama, DeepSeek, Qwen — all on your hardware.">
-  <meta property="og:title" content="BlackRoad AI">
-  <meta property="og:description" content="LLM inference, model deployment, and AI agent orchestration. vLLM, Ollama, DeepSeek, Qwen — all on your hardware.">
-  <meta property="og:url" content="https://github.com/BlackRoad-AI">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --brand: #9C27B0;
-      --black: #000000;
-      --white: #ffffff;
-      --gray-900: #0a0a0a;
-      --gray-800: #141414;
-      --gray-700: #1e1e1e;
-      --gray-600: #2a2a2a;
-      --gray-400: #666;
-      --gray-200: #aaa;
-      --phi: 1.618;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--black);
-      color: var(--white);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ── HERO ─────────────────────────────────────────── */
-    .hero {
-      position: relative;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2rem;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, #9C27B028 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, #9C27B015 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    /* Animated grid */
-    .grid-bg {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(#9C27B008 1px, transparent 1px),
-        linear-gradient(90deg, #9C27B008 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: gridScroll 20s linear infinite;
-    }
-
-    @keyframes gridScroll {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(50px); }
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      max-width: 820px;
-    }
-
-    .org-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #9C27B018;
-      border: 1px solid #9C27B040;
-      border-radius: 100px;
-      padding: 8px 20px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #9C27B0;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 34px;
-      backdrop-filter: blur(10px);
-    }
-
-    .org-badge .dot {
-      width: 6px; height: 6px;
-      background: #9C27B0;
-      border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    .hero-icon {
-      font-size: 72px;
-      line-height: 1;
-      margin-bottom: 24px;
-      filter: drop-shadow(0 0 30px #9C27B060);
-    }
-
-    h1 {
-      font-size: clamp(42px, 8vw, 88px);
-      font-weight: 900;
-      line-height: 1.0;
-      letter-spacing: -0.03em;
-      margin-bottom: 16px;
-      background: linear-gradient(135deg, #ffffff 0%, #9C27B0 50%, #ffffff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      background-size: 200%;
-      animation: shimmer 4s ease-in-out infinite alternate;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
-    }
-
-    .tagline {
-      font-size: clamp(18px, 3vw, 28px);
-      font-weight: 300;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 24px;
-      letter-spacing: -0.01em;
-    }
-
-    .description {
-      font-size: 17px;
-      line-height: 1.618;
-      color: rgba(255,255,255,0.5);
-      max-width: 600px;
-      margin: 0 auto 48px;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: #9C27B0;
-      color: #fff;
-      box-shadow: 0 0 30px #9C27B050;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 40px #9C27B070;
-    }
-
-    .btn-secondary {
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.8);
-      border: 1px solid rgba(255,255,255,0.12);
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.1);
-      transform: translateY(-2px);
-    }
-
-    /* ── TAGS ─────────────────────────────────────────── */
-    .tags-section {
-      padding: 60px 2rem;
-      text-align: center;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .tags-wrap {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 8px 18px;
-      background: #9C27B015;
-      border: 1px solid #9C27B030;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #9C27B0;
-      letter-spacing: 0.03em;
-    }
-
-    /* ── STATS ────────────────────────────────────────── */
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 0;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .stat {
-      flex: 1;
-      max-width: 200px;
-      padding: 40px 20px;
-      text-align: center;
-      border-right: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .stat:last-child { border-right: none; }
-
-    .stat-value {
-      font-size: 36px;
-      font-weight: 800;
-      color: #9C27B0;
-      letter-spacing: -0.03em;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: rgba(255,255,255,0.4);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    /* ── FOOTER ───────────────────────────────────────── */
-    footer {
-      padding: 40px 2rem;
-      text-align: center;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .footer-logo {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-      margin-bottom: 8px;
-    }
-
-    .footer-logo span { color: #9C27B0; }
-
-    .footer-copy {
-      font-size: 12px;
-      color: rgba(255,255,255,0.2);
-    }
-
-    /* ── SCROLL INDICATOR ─────────────────────────────── */
-    .scroll-hint {
-      position: absolute;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      color: rgba(255,255,255,0.3);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .scroll-arrow {
-      width: 20px;
-      height: 20px;
-      border-right: 2px solid #9C27B060;
-      border-bottom: 2px solid #9C27B060;
-      transform: rotate(45deg);
-      animation: bounce 2s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: rotate(45deg) translateY(0); }
-      50% { transform: rotate(45deg) translateY(6px); }
-    }
-
-    @media (max-width: 600px) {
-      .stats { flex-direction: column; }
-      .stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    }
-
-    /* ── CHAT ─────────────────────────────────────────── */
-    .chat-section {
-      padding: 80px 2rem;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .section-label {
-      text-align: center;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #9C27B0;
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: clamp(26px, 4vw, 40px);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 8px;
-    }
-
-    .section-sub {
-      text-align: center;
-      font-size: 15px;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 48px;
-    }
-
-    .chat-container {
-      max-width: 760px;
-      margin: 0 auto;
-      background: #0d0d0d;
-      border: 1px solid rgba(156,39,176,0.25);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    .chat-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      background: rgba(156,39,176,0.06);
-    }
-
-    .chat-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.7);
-    }
-
-    .status-dot {
-      width: 8px; height: 8px;
-      background: #22c55e;
-      border-radius: 50%;
-      box-shadow: 0 0 6px #22c55e80;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .status-dot.offline { background: #ef4444; box-shadow: 0 0 6px #ef444480; }
-
-    .model-select {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px;
-      color: rgba(255,255,255,0.8);
-      font-size: 12px;
-      padding: 5px 10px;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .model-select:focus { border-color: #9C27B060; }
-
-    .chat-messages {
-      height: 340px;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      scroll-behavior: smooth;
-    }
-
-    .chat-messages::-webkit-scrollbar { width: 4px; }
-    .chat-messages::-webkit-scrollbar-track { background: transparent; }
-    .chat-messages::-webkit-scrollbar-thumb { background: #9C27B040; border-radius: 2px; }
-
-    .chat-welcome {
-      text-align: center;
-      padding: 40px 20px;
-      color: rgba(255,255,255,0.35);
-      font-size: 14px;
-      line-height: 1.7;
-    }
-
-    .chat-welcome code {
-      background: rgba(156,39,176,0.15);
-      border: 1px solid rgba(156,39,176,0.3);
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-size: 13px;
-      color: #9C27B0;
-      font-family: 'Courier New', monospace;
-    }
-
-    .chat-msg {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-width: 88%;
-      animation: fadeIn 0.2s ease;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-    .chat-msg.user { align-self: flex-end; align-items: flex-end; }
-    .chat-msg.assistant { align-self: flex-start; }
-
-    .msg-bubble {
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 14px;
-      line-height: 1.6;
-      word-break: break-word;
-    }
-
-    .chat-msg.user .msg-bubble {
-      background: #9C27B0;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .chat-msg.assistant .msg-bubble {
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.85);
-      border-bottom-left-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .msg-meta {
-      font-size: 11px;
-      color: rgba(255,255,255,0.25);
-    }
-
-    .typing-dots span {
-      display: inline-block;
-      width: 6px; height: 6px;
-      background: rgba(255,255,255,0.4);
-      border-radius: 50%;
-      margin: 0 2px;
-      animation: typingBounce 1.2s ease-in-out infinite;
-    }
-
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typingBounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-6px); }
-    }
-
-    .chat-input-row {
-      display: flex;
-      gap: 10px;
-      padding: 14px 16px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      background: rgba(0,0,0,0.3);
-    }
-
-    .chat-input {
-      flex: 1;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      color: #fff;
-      font-family: inherit;
-      font-size: 14px;
-      padding: 10px 14px;
-      resize: none;
-      outline: none;
-      transition: border-color 0.2s;
-      max-height: 120px;
-      overflow-y: auto;
-    }
-
-    .chat-input:focus { border-color: #9C27B060; }
-
-    .chat-input::placeholder { color: rgba(255,255,255,0.25); }
-
-    .chat-send-btn {
-      background: #9C27B0;
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      width: 42px;
-      height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: all 0.2s;
-    }
-
-    .chat-send-btn:hover { background: #7B1FA2; transform: scale(1.05); }
-    .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    .chat-footer-note {
-      text-align: center;
-      font-size: 11px;
-      color: rgba(255,255,255,0.2);
-      padding: 10px 16px 14px;
-      letter-spacing: 0.03em;
-    }
-
-    /* ── PRICING ──────────────────────────────────────── */
-    .pricing-section {
-      padding: 80px 2rem;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-
-    @media (max-width: 760px) {
-      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
-    }
-
-    .pricing-card {
-      background: #0d0d0d;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 32px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      transition: border-color 0.2s;
-    }
-
-    .pricing-card:hover { border-color: rgba(156,39,176,0.35); }
-
-    .pricing-card.featured {
-      border-color: rgba(156,39,176,0.5);
-      background: linear-gradient(180deg, rgba(156,39,176,0.08) 0%, #0d0d0d 60%);
-      position: relative;
-    }
-
-    .featured-badge {
-      position: absolute;
-      top: -1px; left: 50%; transform: translateX(-50%);
-      background: #9C27B0;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 4px 16px;
-      border-radius: 0 0 8px 8px;
-    }
-
-    .plan-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.5);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .plan-price {
-      font-size: 44px;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      color: #fff;
-      line-height: 1;
-    }
-
-    .plan-price sup { font-size: 22px; font-weight: 600; vertical-align: super; }
-    .plan-price small { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.4); }
-
-    .plan-desc {
-      font-size: 13px;
-      color: rgba(255,255,255,0.4);
-      line-height: 1.5;
-    }
-
-    .plan-features {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-    }
-
-    .plan-features li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.65);
-    }
-
-    .plan-features li::before {
-      content: '✓';
-      color: #9C27B0;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .btn-plan {
-      display: block;
-      text-align: center;
-      padding: 13px 20px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-      width: 100%;
-    }
-
-    .btn-plan-primary {
-      background: #9C27B0;
-      color: #fff;
-      box-shadow: 0 0 20px #9C27B040;
-    }
-
-    .btn-plan-primary:hover { background: #7B1FA2; transform: translateY(-1px); }
-
-    .btn-plan-secondary {
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.8);
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-
-    .btn-plan-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
-
-    .checkout-success {
-      display: none;
-      text-align: center;
-      padding: 60px 2rem;
-      color: #22c55e;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-text-stroke:.2px rgba(255,255,255,.1);scroll-behavior:smooth}
+*{shape-rendering:geometricPrecision}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;--white:#fff;--black:#000;--border:#1a1a1a;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);overflow-x:hidden}
+
+/* ═══ GRAD BAR ═══ */
+.grad-bar{height:4px;background:var(--g);image-rendering:crisp-edges}
+
+/* ═══ NAV — outlined container, white text only ═══ */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-mark{width:28px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:14px;font-weight:500;color:var(--white);opacity:.5;text-decoration:none;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+.nav-cta{display:flex;gap:10px}
+.btn-outline{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg);transition:border-color .2s}
+.btn-outline:hover{border-color:#444}
+.btn-solid{padding:8px 20px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+
+/* ═══ HERO — decorative orbs (gradient), text white ═══ */
+.hero{text-align:center;padding:120px 48px 80px;position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none}
+.orb-1{width:400px;height:400px;background:#CC00AA;top:-150px;left:-5%}
+.orb-2{width:350px;height:350px;background:#4488FF;top:-100px;right:-5%}
+.orb-3{width:200px;height:200px;background:#FF2255;bottom:-100px;left:30%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);margin-bottom:32px}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--g135)}
+.hero h1{font-size:64px;font-weight:700;color:var(--white);line-height:1.08;margin-bottom:24px;max-width:780px;margin-left:auto;margin-right:auto;letter-spacing:-.02em}
+.hero p{font-size:18px;color:var(--white);opacity:.45;max-width:500px;margin:0 auto 48px;line-height:1.7}
+.hero-cta{display:flex;gap:16px;justify-content:center}
+.btn-lg{padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+.btn-lg-solid{background:var(--white);color:var(--black);border:none}
+.btn-lg-outline{background:transparent;color:var(--white);border:1px solid var(--border);transition:border-color .2s}
+.btn-lg-outline:hover{border-color:#444}
+
+/* ═══ CAPABILITIES — outlined cards, gradient accent bars ═══ */
+.section{max-width:1200px;margin:0 auto;padding:80px 48px}
+.section-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.25;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:32px;font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.015em}
+.section-desc{font-size:14px;color:var(--white);opacity:.4;max-width:460px;margin-bottom:48px}
+
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.cap-card{border:1px solid var(--border);border-radius:10px;padding:28px;transition:border-color .2s}
+.cap-card:hover{border-color:#333}
+.cap-accent{width:32px;height:3px;border-radius:1px;background:var(--g);margin-bottom:20px;image-rendering:crisp-edges}
+.cap-card h3{font-size:15px;font-weight:600;color:var(--white);margin-bottom:8px}
+.cap-card p{font-size:13px;color:var(--white);opacity:.4;line-height:1.7}
+
+/* ═══ MODELS — lined rows (border-bottom), no fill ═══ */
+.model-list{border-top:1px solid var(--border)}
+.model-row{display:grid;grid-template-columns:1fr 1fr auto;gap:24px;align-items:center;padding:20px 0;border-bottom:1px solid var(--border)}
+.model-name{font-size:15px;font-weight:600;color:var(--white)}
+.model-desc{font-size:13px;color:var(--white);opacity:.4}
+.model-badge{padding:4px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--jb);font-size:10px;color:var(--white);opacity:.5}
+
+/* ═══ METRICS — outlined containers ═══ */
+.metrics-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:48px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.metric{text-align:center}
+.metric-val{font-size:36px;font-weight:700;color:var(--white)}
+.metric-label{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+
+/* ═══ ARCHITECTURE — outlined card with gradient top bar ═══ */
+.arch-card{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.arch-grad{height:3px;background:var(--g)}
+.arch-body{padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.arch-col h3{font-size:16px;font-weight:600;color:var(--white);margin-bottom:16px}
+.arch-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.arch-item:last-child{border-bottom:none}
+.arch-dot{width:6px;height:6px;border-radius:50%;background:var(--g135);flex-shrink:0}
+.arch-item span{font-size:13px;color:var(--white);opacity:.5}
+
+/* ═══ CTA — outlined box with gradient top ═══ */
+.cta{text-align:center;padding:80px 48px}
+.cta-box{max-width:700px;margin:0 auto;padding:64px;border:1px solid var(--border);border-radius:16px;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.cta-box h2{font-size:28px;font-weight:700;color:var(--white);margin-bottom:12px}
+.cta-box p{font-size:14px;color:var(--white);opacity:.4;margin-bottom:32px;max-width:400px;margin-left:auto;margin-right:auto}
+
+/* ═══ FOOTER — lined (border-top) ═══ */
+footer{border-top:1px solid var(--border);padding:48px;display:flex;justify-content:space-between;align-items:center}
+.footer-brand{font-weight:700;font-size:16px;color:var(--white)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--white);opacity:.4;text-decoration:none;transition:opacity .2s}
+.footer-links a:hover{opacity:1}
+.footer-copy{font-size:12px;color:var(--white);opacity:.2}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}.nav-links{display:none}
+  .hero{padding:80px 20px 60px}.hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section{padding:48px 20px}
+  .cap-grid{grid-template-columns:1fr}
+  .model-row{grid-template-columns:1fr;gap:8px}
+  .metrics-bar{grid-template-columns:repeat(2,1fr);gap:24px}
+  .arch-body{grid-template-columns:1fr}
+  .cta{padding:48px 20px}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:32px 20px}
+}
+</style>
 </head>
 <body>
 
-  <section class="hero">
-    <div class="grid-bg"></div>
-    <div class="hero-content">
-      <div class="org-badge">
-        <span class="dot"></span>
-        AI/ML Division
-      </div>
-      <div class="hero-icon">🧠</div>
-      <h1>BlackRoad AI</h1>
-      <p class="tagline">Intelligence at Scale</p>
-      <p class="description">LLM inference, model deployment, and AI agent orchestration. vLLM, Ollama, DeepSeek, Qwen — all on your hardware.</p>
-      <div class="hero-actions">
-        <a href="https://github.com/BlackRoad-AI" class="btn btn-primary">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-          View on GitHub
-        </a>
-        <a href="https://blackroad.io" class="btn btn-secondary">
-          🌐 BlackRoad OS
-        </a>
-      </div>
-    </div>
-    <div class="scroll-hint">
-      <div class="scroll-arrow"></div>
-      scroll
-    </div>
-  </section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Gradient Bar (top)                   -->
+<!-- Always present. Never remove.                   -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="grad-bar"></div>
 
-  <section class="tags-section">
-    <div class="tags-wrap">
-      <span class="tag">LLM Inference</span><span class="tag">Model Registry</span><span class="tag">Vector DBs</span><span class="tag">Embeddings</span>
-    </div>
-  </section>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Navigation                           -->
+<!-- Outlined (border-bottom). White text only.      -->
+<!-- Swap: logo text, link labels, CTA labels.       -->
+<!-- ═══════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-logo"><img src="blackroad-logo.png" alt="BlackRoad" style="width:32px;height:32px;border-radius:50%"> BlackRoad AI</div>
+  <div class="nav-links">
+    <a href="#models">Models</a>
+    <a href="https://research-lab-blackroad-io.pages.dev">Research</a>
+    <a href="#architecture">API</a>
+    <a href="https://blackroad-os-home.pages.dev">Docs</a>
+  </div>
+  <div class="nav-cta">
+    <a class="btn-outline" href="https://blackroad-io.pages.dev" style="text-decoration:none">BlackRoad OS Inc</a>
+    <a class="btn-solid" href="#models" style="text-decoration:none">Get Access</a>
+  </div>
+</nav>
 
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-value">30K</div>
-      <div class="stat-label">AI Agents</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">17</div>
-      <div class="stat-label">Organizations</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">1,800+</div>
-      <div class="stat-label">Repositories</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">$0</div>
-      <div class="stat-label">AI Cost Target</div>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Hero                                 -->
+<!-- Decorative orbs = gradient colors.              -->
+<!-- Badge = outlined pill with gradient dot.         -->
+<!-- Swap: badge text, h1, subtitle, CTA labels.     -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-badge"><div class="hero-badge-dot"></div> 52 TOPS · 6 Agents · Your Hardware</div>
+  <h1>AI that runs on your hardware</h1>
+  <p>Six named agents — LUCIDIA, ALICE, OCTAVIA, PRISM, ECHO, CIPHER — running through a FastAPI gateway across a Pi cluster. Two Hailo-8 accelerators, 29 model instances across four nodes, zero cloud dependency. Light always remembers.</p>
+  <div class="hero-cta">
+    <a class="btn-lg btn-lg-solid" href="#models" style="text-decoration:none">Explore Models</a>
+    <a class="btn-lg btn-lg-outline" href="#architecture" style="text-decoration:none">View Architecture</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Capabilities Grid (3-col)            -->
+<!-- Outlined cards. Gradient accent bar (decorative).-->
+<!-- Swap: section label, title, desc, card content. -->
+<!-- Use 3, 6, or 9 cards. Never 1, 2, 4, 5.        -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label" id="capabilities">Capabilities</div>
+  <div class="section-title">What we run</div>
+  <div class="section-desc">Edge-native AI across inference, generation, speech, and vision — all on <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">Raspberry Pi 5 hardware</a>.</div>
+  <div class="cap-grid">
+    <div class="cap-card"><div class="cap-accent"></div><h3>AI Gateway</h3><p>Node.js HTTP gateway (src/index.ts) with rate limiting, CORS, task marketplace, and memory chain. Routes /v1/chat/completions across 8 cluster nodes with auto-failover.</p></div>
+    <div class="cap-card"><div class="cap-accent"></div><h3>6 Named Agents</h3><p>Python agent classes: alice.py (worker — execute, generate_code, run_shell), lucidia.py (reasoning — chat, stream, philosophize), octavia.py, prism.py, echo.py, cipher.py.</p></div>
+    <div class="cap-card"><div class="cap-accent"></div><h3>AI Cluster Gateway</h3><p>FastAPI gateway (blackroad-ai-api-gateway) defining 8 Pi cluster nodes. /chat with model auto-selection, load balancing, /models, /health, /broadcast endpoints.</p></div>
+    <div class="cap-card"><div class="cap-accent"></div><h3>CECE Identity</h3><p>Custom inference models fine-tuned for BlackRoad operations. cece-profile.json identity persistence, modelfiles/ for Ollama custom model definitions.</p></div>
+    <div class="cap-card"><div class="cap-accent"></div><h3>Persistent Memory</h3><p>156,675 entries in FTS5 index. <a href="https://blackroad-assets.pages.dev#memory" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">228 SQLite databases</a>. Lucidia's main.py stores key-value memory pairs and dispatches tools across provider registry.</p></div>
+    <div class="cap-card"><div class="cap-accent"></div><h3>br-ai.sh</h3><p>Shell tool that connects to Ollama, picks best available model, streams prompts, performs code review and diff summaries. Part of the <a href="https://blackroad-os-home.pages.dev" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">80+ br-* CLI tools</a> in the operator monorepo.</p></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Model / Item List                    -->
+<!-- Lined rows (border-top + border-bottom).        -->
+<!-- Outlined badge. No filled backgrounds.          -->
+<!-- Swap: row content. Add/remove rows as needed.   -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label" id="models">Models</div>
+  <div class="section-title">Local model registry</div>
+  <div class="section-desc">All models run on-device via Ollama. No API keys, no rate limits, no data leaving the network.</div>
+  <div class="model-list">
+    <div class="model-row"><span class="model-name">CECE-7B</span><span class="model-desc">Custom fine-tuned model for BlackRoad OS operations and infrastructure reasoning</span><span class="model-badge">Custom</span></div>
+    <div class="model-row"><span class="model-name">CECE-Code</span><span class="model-desc">Code generation and review specialized for shell scripts and Python</span><span class="model-badge">Custom</span></div>
+    <div class="model-row"><span class="model-name">Llama 3</span><span class="model-desc">Meta's general-purpose language model for chat and reasoning tasks</span><span class="model-badge">8B</span></div>
+    <div class="model-row"><span class="model-name">Mistral</span><span class="model-desc">Fast inference model for real-time completions and agent orchestration</span><span class="model-badge">7B</span></div>
+    <div class="model-row"><span class="model-name">CodeLlama</span><span class="model-desc">Dedicated code model for Lucidia CLI copilot and Gitea AI review</span><span class="model-badge">7B</span></div>
+    <div class="model-row"><span class="model-name">Phi-3</span><span class="model-desc">Lightweight model for edge inference where speed matters more than depth</span><span class="model-badge">3.8B</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Metrics Bar                          -->
+<!-- Lined (border-top + border-bottom). No fill.    -->
+<!-- Swap: values and labels. Always use 4.          -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="metrics-bar">
+    <div class="metric"><div class="metric-val">52</div><div class="metric-label">TOPS Compute</div></div>
+    <div class="metric"><div class="metric-val">29</div><div class="metric-label">Model Instances</div></div>
+    <div class="metric"><div class="metric-val">156K</div><div class="metric-label">Memory Entries</div></div>
+    <div class="metric"><div class="metric-val">0</div><div class="metric-label">Cloud Dependencies</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: Architecture / Detail Card           -->
+<!-- Outlined card with gradient top bar (decorative)-->
+<!-- Two columns, lined rows inside. Gradient dots.  -->
+<!-- Swap: column titles, row items.                 -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-label" id="architecture">Infrastructure</div>
+  <div class="section-title">AI compute topology</div>
+  <div class="section-desc">Two <a href="https://blackroad-infra.pages.dev#accelerators" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">accelerated nodes</a> in a WireGuard mesh. Models and inference requests route across <a href="https://blackroad-infra.pages.dev#fleet" style="color:var(--white);opacity:.5;text-decoration:underline;text-underline-offset:3px">the fleet</a>.</div>
+  <div class="arch-card">
+    <div class="arch-grad"></div>
+    <div class="arch-body">
+      <div class="arch-col">
+        <h3>Gateway Layer (Code)</h3>
+        <div class="arch-item"><div class="arch-dot"></div><span>blackroad-gateway/src/index.ts — HTTP server, /agents, /tasks</span></div>
+        <div class="arch-item"><div class="arch-dot"></div><span>blackroad-ai-api-gateway — FastAPI, 8 cluster nodes</span></div>
+        <div class="arch-item"><div class="arch-dot"></div><span>blackroad-api/src/main.py — SQLite, seeds 6 agents</span></div>
+        <div class="arch-item"><div class="arch-dot"></div><span>blackroad-cli/src/cli.ts — Commander.js, agents/tasks/chat</span></div>
+      </div>
+      <div class="arch-col">
+        <h3>Hardware Layer (Nodes)</h3>
+        <div class="arch-item"><div class="arch-dot"></div><span>Cecilia — .96 — Hailo-8 (HLLWM2B233704667) + 16 Ollama models (DOWN)</span></div>
+        <div class="arch-item"><div class="arch-dot"></div><span>Octavia — .100 — Hailo-8 (HLLWM2B233704606) + 1TB NVMe</span></div>
+        <div class="arch-item"><div class="arch-dot"></div><span>Alice — .49 — Gateway, DNS, 65+ tunnel routes</span></div>
+        <div class="arch-item"><div class="arch-dot"></div><span>Lucidia — .38 — 334 web apps, APIs, 6 Ollama models</span></div>
+        <div class="arch-item"><div class="arch-dot"></div><span>Aria — .98 — Portainer, Headscale, 6 Ollama models</span></div>
+      </div>
     </div>
   </div>
+</section>
 
-  <!-- ── CHAT ────────────────────────────────────────────────────────────── -->
-  <section class="chat-section" id="chat">
-    <p class="section-label">Local AI</p>
-    <h2 class="section-title">Talk to Ollama</h2>
-    <p class="section-sub">@ollama · @copilot · @lucidia · @blackboxprogramming — all go straight to your hardware.</p>
+<!-- ═══════════════════════════════════════════════ -->
+<!-- COMPONENT: CTA Box                              -->
+<!-- Outlined with gradient top bar. Centered text.  -->
+<!-- Swap: headline, description, button label.      -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="cta">
+  <div class="cta-box">
+    <h2>Run your own AI stack</h2>
+    <p>Deploy sovereign inference on hardware you control. No API keys. No rate limits. No data leaving your network.</p>
+    <a class="btn-lg btn-lg-solid" href="https://blackroad-os-home.pages.dev" style="text-decoration:none">Get Started</a>
+  </div>
+</section>
 
-    <div class="chat-container">
-      <div class="chat-header">
-        <div class="chat-status">
-          <span class="status-dot" id="ollamaStatusDot"></span>
-          <span id="ollamaStatusText">Ollama — Local Inference</span>
-        </div>
-        <select id="modelSelect" class="model-select" title="Select Ollama model">
-          <option value="llama3.2">llama3.2</option>
-          <option value="llama3.1">llama3.1</option>
-          <option value="deepseek-r1">deepseek-r1</option>
-          <option value="qwen2.5">qwen2.5</option>
-          <option value="mistral">mistral</option>
-          <option value="codellama">codellama</option>
-        </select>
-      </div>
+<section class="section" style="padding-bottom:0">
+  <div class="section-label">Related</div>
+  <div class="section-title">Go deeper</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+    <a href="https://blackroad-infra.pages.dev#accelerators" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> 52 TOPS Hailo-8</a>
+    <a href="https://blackroad-infra.pages.dev#fleet" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> 5-Node Fleet</a>
+    <a href="https://blackroad-assets.pages.dev#memory" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> 228 SQLite Databases</a>
+    <a href="https://blackroad-guardian-dashboard.pages.dev#encryption" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> Encryption Layer</a>
+    <a href="https://blackroad-os-home.pages.dev" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> 80+ CLI Tools</a>
+    <a href="https://research-lab-blackroad-io.pages.dev" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> Research Papers</a>
+    <a href="https://education-blackroad-io.pages.dev" style="text-decoration:none;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--white);opacity:.5;display:inline-flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:var(--g135)"></div> AI-Powered Education</a>
+  </div>
+</section>
 
-      <div class="chat-messages" id="chatMessages">
-        <div class="chat-welcome" id="chatWelcome">
-          <p>All requests route to <strong>Ollama</strong> on your hardware.<br>Zero external AI providers.</p>
-          <p style="margin-top:12px;">Use <code>@ollama</code>, <code>@copilot</code>, <code>@lucidia</code>, or <code>@blackboxprogramming</code> — they all go to Ollama.</p>
-        </div>
-      </div>
-
-      <div class="chat-input-row">
-        <textarea id="chatInput" class="chat-input" rows="1"
-          placeholder="@ollama what can you do?  (also @copilot · @lucidia · @blackboxprogramming)"></textarea>
-        <button id="chatSend" class="chat-send-btn" title="Send">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-        </button>
-      </div>
-      <p class="chat-footer-note">⚡ Zero external AI providers · Your hardware · Your data</p>
-    </div>
-  </section>
-
-  <!-- ── PRICING ───────────────────────────────────────────────────────────── -->
-  <section class="pricing-section" id="pricing">
-    <p class="section-label">Stripe · Live</p>
-    <h2 class="section-title">Plans & Pricing</h2>
-    <p class="section-sub">Managed on your infrastructure. Billed via Stripe.</p>
-
-    <div id="checkoutSuccess" class="checkout-success">
-      <div style="font-size:48px;margin-bottom:16px;">✅</div>
-      <h3 style="font-size:24px;font-weight:700;color:#fff;margin-bottom:8px;">Payment Confirmed</h3>
-      <p style="color:rgba(255,255,255,0.5);">Welcome to BlackRoad AI. Your account is being provisioned.</p>
-    </div>
-
-    <div class="pricing-grid" id="pricingGrid">
-      <!-- Starter -->
-      <div class="pricing-card">
-        <div>
-          <p class="plan-name">Starter</p>
-          <p class="plan-price"><sup>$</sup>29<small>/mo</small></p>
-          <p class="plan-desc">Self-hosted Ollama on your own machine. Access to all open models.</p>
-        </div>
-        <ul class="plan-features">
-          <li>Ollama inference on your hardware</li>
-          <li>All open-source models</li>
-          <li>REST API access</li>
-          <li>Community support</li>
-        </ul>
-        <button class="btn-plan btn-plan-secondary"
-          data-price-id="price_starter"
-          data-mode="subscription"
-          onclick="startCheckout(this)">Get Started</button>
-      </div>
-
-      <!-- Pro (featured) -->
-      <div class="pricing-card featured">
-        <span class="featured-badge">Most Popular</span>
-        <div>
-          <p class="plan-name">Pro</p>
-          <p class="plan-price"><sup>$</sup>99<small>/mo</small></p>
-          <p class="plan-desc">Multi-node Ollama cluster. Priority routing and advanced orchestration.</p>
-        </div>
-        <ul class="plan-features">
-          <li>Everything in Starter</li>
-          <li>Multi-node Ollama cluster</li>
-          <li>Agent orchestration</li>
-          <li>vLLM + Ollama hybrid</li>
-          <li>Priority support</li>
-        </ul>
-        <button class="btn-plan btn-plan-primary"
-          data-price-id="price_pro"
-          data-mode="subscription"
-          onclick="startCheckout(this)">Subscribe — $99/mo</button>
-      </div>
-
-      <!-- Enterprise -->
-      <div class="pricing-card">
-        <div>
-          <p class="plan-name">Enterprise</p>
-          <p class="plan-price"><sup>$</sup>499<small>/mo</small></p>
-          <p class="plan-desc">Dedicated infrastructure, SLAs, white-glove onboarding.</p>
-        </div>
-        <ul class="plan-features">
-          <li>Everything in Pro</li>
-          <li>Dedicated hardware nodes</li>
-          <li>Custom model fine-tuning</li>
-          <li>99.9% uptime SLA</li>
-          <li>24/7 enterprise support</li>
-        </ul>
-        <button class="btn-plan btn-plan-secondary"
-          data-price-id="price_enterprise"
-          data-mode="subscription"
-          onclick="startCheckout(this)">Subscribe — $499/mo</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── SCRIPTS ──────────────────────────────────────────────────────────── -->
-  <script>
-  (function () {
-    'use strict';
-
-    // ── Constants ──────────────────────────────────────────────────────────
-    const MENTION_RE = /@(copilot|lucidia|blackboxprogramming|ollama)\b\.?\s*/gi;
-    const API_BASE   = '';   // same origin; override for local dev if needed
-
-    // ── DOM refs ───────────────────────────────────────────────────────────
-    const msgEl      = document.getElementById('chatMessages');
-    const inputEl    = document.getElementById('chatInput');
-    const sendBtn    = document.getElementById('chatSend');
-    const modelSel   = document.getElementById('modelSelect');
-    const statusDot  = document.getElementById('ollamaStatusDot');
-    const statusText = document.getElementById('ollamaStatusText');
-    const welcomeEl  = document.getElementById('chatWelcome');
-
-    // ── Chat helpers ───────────────────────────────────────────────────────
-    function appendMsg(role, text) {
-      if (welcomeEl) welcomeEl.remove();
-      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const wrapper = document.createElement('div');
-      wrapper.className = `chat-msg ${role}`;
-      wrapper.innerHTML = `
-        <div class="msg-bubble"></div>
-        <span class="msg-meta">${role === 'user' ? 'You' : 'Ollama'} · ${now}</span>`;
-      wrapper.querySelector('.msg-bubble').textContent = text;
-      msgEl.appendChild(wrapper);
-      msgEl.scrollTop = msgEl.scrollHeight;
-      return wrapper.querySelector('.msg-bubble');
-    }
-
-    function showTyping() {
-      if (welcomeEl) welcomeEl.remove();
-      const el = document.createElement('div');
-      el.className = 'chat-msg assistant';
-      el.id = 'typingIndicator';
-      el.innerHTML = '<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-      msgEl.appendChild(el);
-      msgEl.scrollTop = msgEl.scrollHeight;
-    }
-
-    function removeTyping() {
-      const el = document.getElementById('typingIndicator');
-      if (el) el.remove();
-    }
-
-    function setStatus(online) {
-      if (online) {
-        statusDot.classList.remove('offline');
-        statusText.textContent = 'Ollama — Local Inference';
-      } else {
-        statusDot.classList.add('offline');
-        statusText.textContent = 'Ollama — Connecting…';
-      }
-    }
-
-    // ── Send message ───────────────────────────────────────────────────────
-    async function send() {
-      const raw = inputEl.value.trim();
-      if (!raw) return;
-
-      inputEl.value = '';
-      inputEl.style.height = '';
-      sendBtn.disabled = true;
-
-      appendMsg('user', raw);
-      showTyping();
-
-      try {
-        const res = await fetch(`${API_BASE}/api/chat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: raw, model: modelSel.value }),
-        });
-
-        removeTyping();
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: 'Request failed' }));
-          appendMsg('assistant', `⚠️ ${err.error || 'Request failed'}`);
-          setStatus(false);
-          return;
-        }
-
-        setStatus(true);
-
-        // Stream NDJSON chunks from Ollama
-        const bubble = appendMsg('assistant', '');
-        const reader  = res.body.getReader();
-        const decoder = new TextDecoder();
-        let   buffer  = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop();
-          for (const line of lines) {
-            if (!line.trim()) continue;
-            try {
-              const chunk = JSON.parse(line);
-              if (chunk.response) {
-                bubble.textContent += chunk.response;
-                msgEl.scrollTop = msgEl.scrollHeight;
-              }
-            } catch { /* skip malformed chunks */ }
-          }
-        }
-      } catch (err) {
-        removeTyping();
-        appendMsg('assistant', `⚠️ Could not reach Ollama: ${err.message}`);
-        setStatus(false);
-      } finally {
-        sendBtn.disabled = false;
-        inputEl.focus();
-      }
-    }
-
-    // ── Event listeners ────────────────────────────────────────────────────
-    sendBtn.addEventListener('click', send);
-
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-    });
-
-    inputEl.addEventListener('input', function () {
-      this.style.height = '';
-      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
-
-    // ── Checkout ───────────────────────────────────────────────────────────
-    window.startCheckout = async function (btn) {
-      const priceId = btn.dataset.priceId;
-      const mode    = btn.dataset.mode || 'subscription';
-      const origText = btn.dataset.origText || btn.textContent;
-
-      btn.disabled    = true;
-      btn.textContent = 'Redirecting…';
-
-      try {
-        const res = await fetch(`${API_BASE}/api/checkout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId, mode }),
-        });
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert(data.error || 'Checkout unavailable. Please try again.');
-          btn.disabled    = false;
-          btn.textContent = origText;
-        }
-      } catch {
-        alert('Could not reach checkout. Please try again.');
-        btn.disabled    = false;
-        btn.textContent = origText;
-      }
-    };
-
-    // Save original button text
-    document.querySelectorAll('[data-price-id]').forEach((b) => {
-      b.dataset.origText = b.textContent;
-    });
-
-    // ── Show checkout success banner ───────────────────────────────────────
-    if (new URLSearchParams(location.search).get('checkout') === 'success') {
-      const successEl  = document.getElementById('checkoutSuccess');
-      const pricingGrid = document.getElementById('pricingGrid');
-      if (successEl)  successEl.style.display  = 'block';
-      if (pricingGrid) pricingGrid.style.display = 'none';
-      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }());
-  </script>
-
-  <footer>
-    <div class="footer-logo">
-      <span>BlackRoad OS</span>, Inc.
-    </div>
-    <div class="footer-copy">© 2026 BlackRoad OS, Inc. All rights reserved. Proprietary — not open source.</div>
-  </footer>
+<footer>
+  <div class="footer-brand"><a href="https://blackroad-io.pages.dev" style="color:inherit;text-decoration:none">BlackRoad AI</a></div>
+  <div class="footer-links">
+    <a href="#models">Models</a>
+    <a href="https://blackroad-infra.pages.dev">Hardware</a>
+    <a href="https://blackroad-assets.pages.dev">Archive</a>
+    <a href="https://research-lab-blackroad-io.pages.dev">Labs</a>
+    <a href="https://github.com/blackboxprogramming" target="_blank">GitHub</a>
+    <a href="https://blackroad-io.pages.dev">OS Inc</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 BlackRoad AI. All rights reserved.</div>
+</footer>
+<div class="grad-bar"></div>
 
 </body>
 </html>
